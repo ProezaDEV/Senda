@@ -137,18 +137,23 @@
 
       <div class="chat-wrap">
         <div class="section-head section-head-sm">
-          <h3>Pergunte à Senda</h3>
-          <p>Tire dúvidas rápidas sobre nutrição e hábitos. Respostas baseadas em conteúdo educativo da plataforma.</p>
+          <h3>Buscar na base da Senda</h3>
+          <p>
+            Digite palavras-chave. O sistema combina termos (ex.: bomba, Durateston, DHEA, nutrição)
+            e abre fichas com FAQ, precauções e tópicos relacionados — sem depender de IA.
+          </p>
         </div>
         <div class="chat" id="chat">
           <div class="chat-log" id="chat-log">
             <div class="bubble bot">
-              Olá. Pergunte sobre nutrição, suplementos, hidratação ou hábitos. Com a IA configurada na Vercel, interpreto perguntas novas; senão, uso a base local da Senda. Respostas curtas e educativas — não substituem consulta.
+              Experimente: “bomba e testosterona”, “Durateston riscos”, “nutrição déficit”, “creatina whey” ou “DHEA”.
+              Vou mostrar caixas de tópicos da nossa base. A IA é opcional e fica no segundo botão.
             </div>
           </div>
           <form class="chat-form" id="chat-form">
-            <input type="text" id="chat-input" placeholder="Digite sua pergunta..." autocomplete="off" />
-            <button type="submit" class="btn">Enviar</button>
+            <input type="text" id="chat-input" placeholder="Ex.: Durateston, DHEA, nutrição, creatina..." autocomplete="off" />
+            <button type="submit" class="btn">Buscar tópicos</button>
+            <button type="button" class="btn btn-ghost" id="ai-ask-btn">Perguntar à IA (opcional)</button>
           </form>
         </div>
       </div>
@@ -156,12 +161,14 @@
 
     <section id="conteudos" class="section contents-section">
       <div class="section-head">
-        <h2>Conteúdos para aprender e aplicar</h2>
-        <p>Resumos práticos de nutrição, saúde e áreas afins — úteis no dia a dia ou no estudo profissional.</p>
+        <h2>Base de conhecimento</h2>
+        <p>Fichas educativas armazenadas no sistema. Clique para abrir no painel de busca.</p>
       </div>
       <div class="filter-bar">
         <button type="button" class="filter active" data-filter="todos">Todos</button>
         <button type="button" class="filter" data-filter="nutricao">Nutrição</button>
+        <button type="button" class="filter" data-filter="suplementos">Suplementos</button>
+        <button type="button" class="filter" data-filter="hormonios">Hormônios</button>
         <button type="button" class="filter" data-filter="saude">Saúde</button>
         <button type="button" class="filter" data-filter="estudos">Estudos</button>
         <button type="button" class="filter" data-filter="natural">Natural</button>
@@ -236,6 +243,7 @@
     </p>
   </footer>
 
+  <script src="kb.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

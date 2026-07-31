@@ -1,197 +1,93 @@
 /**
  * Senda — protótipo educativo de orientação em nutrição e saúde.
+ * Busca local por palavras-chave na base (kb.js). IA só se o usuário pedir.
  * Cálculos: Mifflin-St Jeor (TMB) + fator de atividade (TDEE).
  */
 
-const CONTENTS = [
-  {
-    id: 1,
-    category: "nutricao",
-    tag: "Nutrição",
-    title: "Déficit calórico sem mistério",
-    summary:
-      "Para emagrecer com segurança, o corpo precisa gastar um pouco mais do que consome. Um déficit moderado (cerca de 15–20%) costuma ser mais sustentável do que cortes extremos.",
-    keywords: ["deficit", "déficit", "emagrecer", "calorias", "peso"],
-  },
-  {
-    id: 2,
-    category: "nutricao",
-    tag: "Nutrição",
-    title: "Superávit para ganhar massa",
-    summary:
-      "Quem busca ganho muscular precisa de energia extra (superávit), proteína adequada e estímulo de treino. O excesso muito grande favorece gordura, não só músculo.",
-    keywords: ["superavit", "superávit", "massa", "ganhar", "proteina", "proteína"],
-  },
-  {
-    id: 3,
-    category: "nutricao",
-    tag: "Nutrição",
-    title: "Proteína no dia a dia",
-    summary:
-      "Referência comum: cerca de 1,6 a 2,2 g por kg de peso para quem treina. Ovos, feijão, iogurte, peixe e carnes magras ajudam a fechar a meta.",
-    keywords: ["proteina", "proteína", "treino", "músculo"],
-  },
-  {
-    id: 4,
-    category: "saude",
-    tag: "Saúde",
-    title: "Hidratação que faz diferença",
-    summary:
-      "Uma base prática é ~35 ml por kg de peso, ajustando com calor e treino. Urina clara e energia estável são bons sinais de que a água está em dia.",
-    keywords: ["agua", "água", "hidratação", "hidratacao", "líquido"],
-  },
-  {
-    id: 5,
-    category: "saude",
-    tag: "Saúde",
-    title: "Quando pensar em exames",
-    summary:
-      "Cansaço intenso, queda de cabelo, alterações de peso sem causa clara ou histórico familiar podem indicar avaliação com hemograma, glicemia, lipídios e tireoide — sempre com profissional.",
-    keywords: ["exame", "exames", "sangue", "diagnostico", "diagnóstico", "medico"],
-  },
-  {
-    id: 6,
-    category: "estudos",
-    tag: "Estudos",
-    title: "Sinais vitais — resumo de enfermagem",
-    summary:
-      "Temperatura, pulso, respiração e pressão arterial formam a base da avaliação. Saber os intervalos de referência ajuda a perceber alterações e comunicar com clareza.",
-    keywords: ["enfermagem", "sinais", "vitais", "pressao", "pressão", "estudo"],
-  },
-  {
-    id: 7,
-    category: "estudos",
-    tag: "Estudos",
-    title: "Metabolismo basal (TMB)",
-    summary:
-      "É a energia que o corpo gasta em repouso absoluto. A fórmula de Mifflin-St Jeor estima a TMB; multiplicando pelo nível de atividade chegamos ao gasto total diário (TDEE).",
-    keywords: ["metabolismo", "tmb", "tdee", "basal", "repouso"],
-  },
-  {
-    id: 8,
-    category: "natural",
-    tag: "Natural",
-    title: "Chá de gengibre e digestão",
-    summary:
-      "O gengibre é usado tradicionalmente para náusea leve e conforto digestivo. Infusão simples: fatias frescas em água quente por 8–10 min. Evite excessos e consulte se houver medicação.",
-    keywords: ["cha", "chá", "gengibre", "natural", "digestão", "receita"],
-  },
-  {
-    id: 9,
-    category: "natural",
-    tag: "Natural",
-    title: "Aveia e saciedade",
-    summary:
-      "Rica em fibras solúveis, a aveia ajuda na saciedade e no controle glicêmico quando faz parte de uma refeição equilibrada. Combine com fruta e fonte de proteína.",
-    keywords: ["aveia", "fibra", "saciedade", "café", "cafe", "receita"],
-  },
-  {
-    id: 10,
-    category: "saude",
-    tag: "Saúde",
-    title: "Sono e fome",
-    summary:
-      "Noites curtas elevam a fome e dificultam escolhas alimentares. Meta útil: 7–9 horas e horário mais estável. Isso apoia qualquer plano nutricional.",
-    keywords: ["sono", "dormir", "fome", "habito", "hábito"],
-  },
-  {
-    id: 11,
-    category: "nutricao",
-    tag: "Suplementos",
-    title: "Creatina — o que costuma se saber",
-    summary:
-      "A creatina monoidratada é um dos suplementos mais estudados para força e performance. Uso comum em literatura: ~3–5 g/dia. Quem tem problema renal deve falar com médico antes.",
-    keywords: ["creatina", "suplemento", "suplementos", "treino", "força"],
-  },
-  {
-    id: 12,
-    category: "nutricao",
-    tag: "Suplementos",
-    title: "Whey e proteína em pó",
-    summary:
-      "Whey ajuda a fechar a meta de proteína quando a comida não basta. Não é mágico: o total diário e o treino importam mais que a marca.",
-    keywords: ["whey", "proteina", "proteína", "suplemento", "shake"],
-  },
-  {
-    id: 13,
-    category: "saude",
-    tag: "Saúde",
-    title: "Anabolizantes — riscos gerais",
-    summary:
-      "Esteroides anabolizantes sem indicação médica elevam riscos cardiovasculares, hepáticos e hormonais. A Senda não orienta ciclos nem doses — procure acompanhamento profissional.",
-    keywords: ["anabolizante", "anabolizantes", "esteroide", "hormonio", "hormônio"],
-  },
-  {
-    id: 14,
-    category: "natural",
-    tag: "Natural",
-    title: "Chá de camomila e relaxamento",
-    summary:
-      "Camomila é usada tradicionalmente para relaxamento leve. Infusão suave à noite pode ajudar a rotina de sono; evite se houver alergia a plantas da família.",
-    keywords: ["camomila", "chá", "cha", "natural", "sono", "relaxar"],
-  },
-];
+const KB = () => window.SENDA_KB || [];
 
-const CHAT_KB = [
-  {
-    keys: ["deficit", "déficit", "emagrecer", "emagrecimento", "perder peso"],
-    reply:
-      "Déficit calórico é consumir menos energia do que o corpo gasta. Na prática: estime seu gasto (TDEE), reduza cerca de 15–20% e priorize proteína + fibras. Cortes muito agressivos aumentam fadiga e efeito sanfona. Use a ferramenta acima para uma meta inicial.",
-  },
-  {
-    keys: ["superavit", "superávit", "massa", "hipertrofia", "ganhar"],
-    reply:
-      "Superávit é ingerir um pouco acima do gasto para favorecer ganho de massa, junto com treino de força e proteína adequada. Comece com +200 a +300 kcal/dia e ajuste conforme a balança e as medidas.",
-  },
-  {
-    keys: ["proteina", "proteína", "whey"],
-    reply:
-      "Para quem treina, 1,6–2,2 g de proteína por kg de peso corporal é uma faixa comum na literatura. Distribua ao longo do dia. Suplemento só ajuda se a comida não fechar a meta.",
-  },
-  {
-    keys: ["agua", "água", "hidrata"],
-    reply:
-      "Uma referência prática é cerca de 35 ml por kg/dia, subindo com treino e calor. Bebidas açucaradas não substituem água para hidratação de base.",
-  },
-  {
-    keys: ["exame", "sangue", "medico", "médico", "nutricionista"],
-    reply:
-      "A Senda não diagnostica. Sinais de alerta (cansaço extremo, tontura, alteração forte de peso) pedem avaliação presencial. Exames frequentes na rotina: hemograma, glicemia, perfil lipídico — pedidos por profissional.",
-  },
-  {
-    keys: ["sono", "dormir", "insonia", "insônia"],
-    reply:
-      "Sono irregular atrapalha fome, humor e recuperação. Tente horário fixo, menos tela à noite e cafeína mais cedo. Sem sono, qualquer plano alimentar fica mais difícil.",
-  },
-  {
-    keys: ["metabolismo", "tmb", "basal", "tdee"],
-    reply:
-      "TMB é o gasto em repouso. TDEE é TMB × nível de atividade. A ferramenta da Senda usa Mifflin-St Jeor para estimar esses números e sugerir meta conforme seu objetivo.",
-  },
-  {
-    keys: ["enfermagem", "estudo", "resumo"],
-    reply:
-      "Na área de estudos, a ideia da Senda é reunir resumos (sinais vitais, farmacologia básica, nutrição clínica) para quem aprende ou ensina — como profissionais de enfermagem compartilhando material didático.",
-  },
-  {
-    keys: ["creatina"],
-    reply:
-      "Creatina monoidratada é bem estudada para força e performance. Faixa comum citada: cerca de 3–5 g/dia com água. Não substitui treino nem proteína. Quem tem doença renal deve consultar médico.",
-  },
-  {
-    keys: ["whey", "suplemento", "suplementos"],
-    reply:
-      "Suplementos (whey, creatina, vitaminas) complementam a alimentação — não a substituem. Whey serve para fechar proteína; vitaminas só fazem sentido se houver deficiência ou orientação. Avalie com nutricionista.",
-  },
-  {
-    keys: ["anabolizante", "anabolizantes", "esteroide", "esteroides"],
-    reply:
-      "Anabolizantes sem indicação médica trazem riscos sérios (coração, fígado, hormônios). A Senda não indica ciclo, dose nem compra. Se houver interesse clínico legítimo, fale com médico.",
-  },
-];
+function normalize(text) {
+  return String(text || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "");
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function getTopicById(id) {
+  return KB().find((t) => t.id === id);
+}
+
+/** Pontua tópicos pela combinação de palavras-chave na mensagem. */
+function searchTopics(query, limit = 6) {
+  const q = normalize(query);
+  if (!q.trim()) return [];
+
+  const words = q.split(/[^a-z0-9]+/).filter((w) => w.length > 2);
+
+  const scored = KB().map((topic) => {
+    const keys = (topic.keywords || []).map(normalize);
+    const hay = normalize([topic.title, topic.summary, topic.tag, ...(topic.keywords || [])].join(" "));
+    let score = 0;
+    const hits = [];
+
+    keys.forEach((k) => {
+      if (!k) return;
+      if (q.includes(k)) {
+        score += 4 + Math.min(k.length, 12) * 0.15;
+        hits.push(k);
+      }
+    });
+
+    words.forEach((w) => {
+      if (hay.includes(w)) score += 1;
+      keys.forEach((k) => {
+        if (k.includes(w) || w.includes(k)) score += 0.5;
+      });
+    });
+
+    // Se falou de anabolizantes/bomba, reforça tópicos de hormônios relacionados
+    const hormoneCue = ["bomba", "anabolizante", "esteroide", "testosterona", "durateston", "dhea"].some((c) =>
+      q.includes(c)
+    );
+    if (hormoneCue && topic.category === "hormonios") score += 2;
+
+    const nutritionCue = ["nutricao", "dieta", "calorias", "proteina", "emagrecer"].some((c) => q.includes(c));
+    if (nutritionCue && topic.category === "nutricao") score += 1.5;
+
+    return { topic, score, hits: [...new Set(hits)] };
+  });
+
+  return scored
+    .filter((x) => x.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit);
+}
+
+function expandWithRelated(matches, max = 8) {
+  const seen = new Set(matches.map((m) => m.topic.id));
+  const out = [...matches];
+  for (const m of matches) {
+    (m.topic.related || []).forEach((id) => {
+      if (seen.has(id) || out.length >= max) return;
+      const t = getTopicById(id);
+      if (t) {
+        seen.add(id);
+        out.push({ topic: t, score: 0, hits: ["relacionado"] });
+      }
+    });
+  }
+  return out;
+}
 
 function mifflinStJeor({ weight, height, age, sex }) {
-  // weight kg, height cm
   const base = 10 * weight + 6.25 * height - 5 * age;
   return sex === "masculino" ? base + 5 : base - 161;
 }
@@ -270,7 +166,7 @@ function buildDirection(data) {
         `Seu gasto estimado em repouso (TMB) é ~${tmb} kcal; com atividade, ~${tdee} kcal (TDEE).`,
         "Déficit = comer abaixo do TDEE (emagrecer). Superávit = acima do TDEE (ganhar massa).",
         `IMC estimado: ${bmi.toFixed(1)} — ${imcLabel(bmi)}.`,
-        "Explore os conteúdos abaixo e use o chat para tirar dúvidas pontuais.",
+        "Explore os conteúdos e use a busca por tópicos no chat.",
         "Quando for aplicar mudanças reais, valide com nutricionista ou médico.",
       ];
   }
@@ -285,14 +181,11 @@ function buildDirection(data) {
   if (Number(data.water) < Number(waterSug) * 0.7) {
     exams.push("Hidratação abaixo do sugerido — ajuste gradual; se houver sede excessiva ou fadiga, converse com profissional.");
   }
-  if (data.goal === "emagrecer" && tdee - targetCalories > 700) {
-    exams.push("Déficit muito alto não é o foco aqui; mantenha o corte moderado da meta calculada.");
-  }
   if (exams.length === 0) {
     exams.push("Com os dados atuais, nenhum alerta forte. Mesmo assim, rotina anual de exames é recomendável.");
   }
 
-  const matches = matchContents(data.query || data.goal);
+  const matches = searchTopics(data.query || data.goal, 4).map((m) => m.topic);
 
   return {
     tmb,
@@ -303,37 +196,8 @@ function buildDirection(data) {
     goalTitle,
     steps,
     exams,
-    matches,
+    matches: matches.length ? matches : KB().slice(0, 3),
   };
-}
-
-function matchContents(query) {
-  const q = (query || "").toLowerCase().normalize("NFD").replace(/\p{M}/gu, "");
-  if (!q.trim()) {
-    return CONTENTS.slice(0, 3);
-  }
-  const scored = CONTENTS.map((item) => {
-    const hay = [item.title, item.summary, ...item.keywords, item.tag]
-      .join(" ")
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/\p{M}/gu, "");
-    let score = 0;
-    q.split(/\s+/).forEach((word) => {
-      if (word.length > 2 && hay.includes(word)) score += 1;
-    });
-    item.keywords.forEach((k) => {
-      const kn = k.toLowerCase().normalize("NFD").replace(/\p{M}/gu, "");
-      if (q.includes(kn)) score += 2;
-    });
-    return { item, score };
-  })
-    .filter((x) => x.score > 0)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 4)
-    .map((x) => x.item);
-
-  return scored.length ? scored : CONTENTS.slice(0, 3);
 }
 
 function renderResult(result) {
@@ -343,8 +207,8 @@ function renderResult(result) {
   body.classList.remove("hidden");
 
   body.innerHTML = `
-    <h3>${result.goalTitle}</h3>
-    <p>IMC estimado: <strong>${result.bmi.toFixed(1)}</strong> — ${result.bmiLabel}</p>
+    <h3>${escapeHtml(result.goalTitle)}</h3>
+    <p>IMC estimado: <strong>${result.bmi.toFixed(1)}</strong> — ${escapeHtml(result.bmiLabel)}</p>
     <div class="metrics">
       <div class="metric"><span>TMB (repouso)</span><strong>${result.tmb} kcal</strong></div>
       <div class="metric"><span>TDEE (com atividade)</span><strong>${result.tdee} kcal</strong></div>
@@ -353,16 +217,16 @@ function renderResult(result) {
     </div>
     <h4 style="margin:0;font-family:var(--font-display)">Sua direção</h4>
     <ul class="direction-list">
-      ${result.steps.map((s) => `<li>${s}</li>`).join("")}
+      ${result.steps.map((s) => `<li>${escapeHtml(s)}</li>`).join("")}
     </ul>
     <div class="alert-box">
       <strong>Exames e cuidado profissional</strong>
-      ${result.exams.map((e) => `<div>• ${e}</div>`).join("")}
+      ${result.exams.map((e) => `<div>• ${escapeHtml(e)}</div>`).join("")}
     </div>
     <div class="match-box">
-      <h4>Conteúdos relacionados à sua pesquisa</h4>
+      <h4>Tópicos da base relacionados</h4>
       <ul>
-        ${result.matches.map((m) => `<li><strong>${m.title}:</strong> ${m.summary}</li>`).join("")}
+        ${result.matches.map((m) => `<li><strong>${escapeHtml(m.title)}:</strong> ${escapeHtml(m.summary)}</li>`).join("")}
       </ul>
     </div>
   `;
@@ -370,31 +234,115 @@ function renderResult(result) {
 
 function renderContents(filter = "todos") {
   const list = document.getElementById("content-list");
-  const items = filter === "todos" ? CONTENTS : CONTENTS.filter((c) => c.category === filter);
+  const items = filter === "todos" ? KB() : KB().filter((c) => c.category === filter);
   list.innerHTML = items
     .map(
       (c) => `
-    <article class="content-item" data-category="${c.category}">
-      <span class="tag">${c.tag}</span>
-      <h3>${c.title}</h3>
-      <p>${c.summary}</p>
+    <article class="content-item" data-id="${escapeHtml(c.id)}" tabindex="0" role="button">
+      <span class="tag">${escapeHtml(c.tag)}</span>
+      <h3>${escapeHtml(c.title)}</h3>
+      <p>${escapeHtml(c.summary)}</p>
     </article>`
     )
     .join("");
+
+  list.querySelectorAll(".content-item").forEach((el) => {
+    const open = () => openTopicInChat(el.dataset.id);
+    el.addEventListener("click", open);
+    el.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        open();
+      }
+    });
+  });
 }
 
-const CHAT_DAILY_LIMIT = 25;
-const CHAT_LIMIT_KEY = "senda_chat_quota";
+function topicCardHtml(topic, hits = []) {
+  const faqs = (topic.faqs || [])
+    .map(
+      (f) => `
+      <details class="faq-item">
+        <summary>${escapeHtml(f.q)}</summary>
+        <p>${escapeHtml(f.a)}</p>
+      </details>`
+    )
+    .join("");
 
-function localChatReply(text) {
-  const q = text.toLowerCase().normalize("NFD").replace(/\p{M}/gu, "");
-  for (const entry of CHAT_KB) {
-    if (entry.keys.some((k) => q.includes(k.normalize("NFD").replace(/\p{M}/gu, "")))) {
-      return entry.reply;
-    }
+  const hitLabel = hits.length
+    ? `<span class="hit-label">Combinações: ${escapeHtml(hits.slice(0, 4).join(", "))}</span>`
+    : "";
+
+  return `
+    <article class="topic-card" data-topic-id="${escapeHtml(topic.id)}">
+      <span class="tag">${escapeHtml(topic.tag)}</span>
+      ${hitLabel}
+      <h4>${escapeHtml(topic.title)}</h4>
+      <p>${escapeHtml(topic.summary)}</p>
+      ${faqs ? `<div class="faq-list">${faqs}</div>` : ""}
+    </article>`;
+}
+
+function appendBubble(text, who) {
+  const log = document.getElementById("chat-log");
+  const div = document.createElement("div");
+  div.className = `bubble ${who}`;
+  div.textContent = text;
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+}
+
+function appendTopicsBlock(matches, intro) {
+  const log = document.getElementById("chat-log");
+  const wrap = document.createElement("div");
+  wrap.className = "topics-block";
+  wrap.innerHTML = `
+    <p class="topics-intro">${escapeHtml(intro)}</p>
+    <div class="topic-grid">
+      ${matches.map((m) => topicCardHtml(m.topic, m.hits)).join("")}
+    </div>
+    <p class="topics-note">Conteúdo educativo da base Senda — não substitui consulta médica ou nutricional.</p>
+  `;
+  log.appendChild(wrap);
+  log.scrollTop = log.scrollHeight;
+}
+
+function openTopicInChat(id) {
+  const topic = getTopicById(id);
+  if (!topic) return;
+  document.getElementById("ferramenta")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  appendBubble(`Abrir tópico: ${topic.title}`, "user");
+  appendTopicsBlock([{ topic, hits: [], score: 1 }], "Tópico da base de conhecimento:");
+}
+
+function handleKnowledgeSearch(text) {
+  let matches = searchTopics(text, 5);
+  if (!matches.length) {
+    appendBubble(
+      "Não achei combinação forte na base. Tente palavras como: nutrição, déficit, creatina, whey, bomba, testosterona, Durateston, DHEA, hidratação ou sono.",
+      "bot"
+    );
+    return;
   }
-  return "Ainda não tenho essa resposta na base local. Com a IA ligada na Vercel, perguntas novas passam a ser interpretadas. Enquanto isso, tente déficit, proteína, creatina, hidratação, sono ou exames.";
+
+  matches = expandWithRelated(matches, 7);
+  const top = matches[0].topic;
+  const keywordsHit = matches
+    .flatMap((m) => m.hits)
+    .filter(Boolean)
+    .slice(0, 6);
+
+  const intro =
+    keywordsHit.length > 0
+      ? `Encontrei tópicos relacionados a: ${[...new Set(keywordsHit)].join(", ")}. Abrindo fichas da base (FAQ + precauções):`
+      : `Encontrei estes tópicos na base da Senda (começando por “${top.title}”):`;
+
+  appendBubble(`Base local · ${matches.length} tópico(s) relacionados.`, "bot");
+  appendTopicsBlock(matches, intro);
 }
+
+const CHAT_DAILY_LIMIT = 15;
+const CHAT_LIMIT_KEY = "senda_chat_quota";
 
 function getChatQuota() {
   const today = new Date().toISOString().slice(0, 10);
@@ -414,15 +362,11 @@ function bumpChatQuota() {
   return q;
 }
 
-async function askSenda(text) {
+async function askAiOptional(text) {
   const quota = getChatQuota();
   if (quota.count >= CHAT_DAILY_LIMIT) {
-    return {
-      reply: `Limite do protótipo: ${CHAT_DAILY_LIMIT} perguntas por dia neste navegador. Volte amanhã ou use a base de conteúdos abaixo.`,
-      source: "limit",
-    };
+    return `Limite do protótipo de IA: ${CHAT_DAILY_LIMIT}/dia. Use a busca por tópicos (sem IA), que é ilimitada neste beta.`;
   }
-
   try {
     const res = await fetch("/api/chat", {
       method: "POST",
@@ -430,47 +374,27 @@ async function askSenda(text) {
       body: JSON.stringify({ message: text }),
     });
     const data = await res.json().catch(() => ({}));
-
     if (res.ok && data.reply) {
       bumpChatQuota();
-      return { reply: data.reply, source: "ai" };
+      return data.reply;
     }
-
     if (data.fallback || data.code === "missing_api_key" || res.status === 503) {
-      bumpChatQuota();
-      return { reply: localChatReply(text), source: "local" };
+      return "IA ainda não configurada na Vercel. A busca por tópicos da base local continua funcionando normalmente.";
     }
-
-    if (res.status === 429) {
-      return { reply: data.error || "Muitas perguntas agora. Aguarde um pouco.", source: "limit" };
-    }
-
-    bumpChatQuota();
-    return {
-      reply: data.error ? `${data.error} Usando base local: ${localChatReply(text)}` : localChatReply(text),
-      source: "local",
-    };
+    return data.error || "Não foi possível usar a IA agora. Tente a busca por palavras-chave.";
   } catch {
-    bumpChatQuota();
-    return { reply: localChatReply(text), source: "local" };
+    return "Sem conexão com a API. Use a busca local por tópicos.";
   }
-}
-
-function appendBubble(text, who) {
-  const log = document.getElementById("chat-log");
-  const div = document.createElement("div");
-  div.className = `bubble ${who}`;
-  div.textContent = text;
-  log.appendChild(div);
-  log.scrollTop = log.scrollHeight;
 }
 
 function setChatBusy(busy) {
   const input = document.getElementById("chat-input");
-  const btn = document.querySelector("#chat-form button");
+  const btn = document.querySelector("#chat-form button[type='submit']");
   input.disabled = busy;
-  btn.disabled = busy;
-  btn.textContent = busy ? "Pensando…" : "Enviar";
+  if (btn) {
+    btn.disabled = busy;
+    btn.textContent = busy ? "Buscando…" : "Buscar tópicos";
+  }
 }
 
 function init() {
@@ -508,7 +432,7 @@ function init() {
     });
   });
 
-  document.getElementById("chat-form").addEventListener("submit", async (e) => {
+  document.getElementById("chat-form").addEventListener("submit", (e) => {
     e.preventDefault();
     const input = document.getElementById("chat-input");
     const text = input.value.trim();
@@ -516,8 +440,25 @@ function init() {
     appendBubble(text, "user");
     input.value = "";
     setChatBusy(true);
-    const { reply } = await askSenda(text);
-    appendBubble(reply, "bot");
+    handleKnowledgeSearch(text);
+    setChatBusy(false);
+    input.focus();
+  });
+
+  document.getElementById("ai-ask-btn")?.addEventListener("click", async () => {
+    const input = document.getElementById("chat-input");
+    const text = input.value.trim();
+    if (!text) {
+      appendBubble("Digite uma pergunta no campo e clique em “Perguntar à IA (opcional)”.", "bot");
+      return;
+    }
+    appendBubble(text, "user");
+    input.value = "";
+    setChatBusy(true);
+    // Sempre mostra base primeiro
+    handleKnowledgeSearch(text);
+    const aiReply = await askAiOptional(text);
+    appendBubble(`IA (opcional): ${aiReply}`, "bot");
     setChatBusy(false);
     input.focus();
   });
@@ -526,12 +467,11 @@ function init() {
     e.preventDefault();
     const fd = new FormData(e.target);
     const name = fd.get("name");
-    const role = fd.get("role");
     const feedback = document.getElementById("interest-feedback");
     const interests = JSON.parse(localStorage.getItem("senda_interest") || "[]");
     interests.push({
       name,
-      role,
+      role: fd.get("role"),
       message: fd.get("message"),
       at: new Date().toISOString(),
     });
