@@ -94,6 +94,42 @@ const CONTENTS = [
       "Noites curtas elevam a fome e dificultam escolhas alimentares. Meta útil: 7–9 horas e horário mais estável. Isso apoia qualquer plano nutricional.",
     keywords: ["sono", "dormir", "fome", "habito", "hábito"],
   },
+  {
+    id: 11,
+    category: "nutricao",
+    tag: "Suplementos",
+    title: "Creatina — o que costuma se saber",
+    summary:
+      "A creatina monoidratada é um dos suplementos mais estudados para força e performance. Uso comum em literatura: ~3–5 g/dia. Quem tem problema renal deve falar com médico antes.",
+    keywords: ["creatina", "suplemento", "suplementos", "treino", "força"],
+  },
+  {
+    id: 12,
+    category: "nutricao",
+    tag: "Suplementos",
+    title: "Whey e proteína em pó",
+    summary:
+      "Whey ajuda a fechar a meta de proteína quando a comida não basta. Não é mágico: o total diário e o treino importam mais que a marca.",
+    keywords: ["whey", "proteina", "proteína", "suplemento", "shake"],
+  },
+  {
+    id: 13,
+    category: "saude",
+    tag: "Saúde",
+    title: "Anabolizantes — riscos gerais",
+    summary:
+      "Esteroides anabolizantes sem indicação médica elevam riscos cardiovasculares, hepáticos e hormonais. A Senda não orienta ciclos nem doses — procure acompanhamento profissional.",
+    keywords: ["anabolizante", "anabolizantes", "esteroide", "hormonio", "hormônio"],
+  },
+  {
+    id: 14,
+    category: "natural",
+    tag: "Natural",
+    title: "Chá de camomila e relaxamento",
+    summary:
+      "Camomila é usada tradicionalmente para relaxamento leve. Infusão suave à noite pode ajudar a rotina de sono; evite se houver alergia a plantas da família.",
+    keywords: ["camomila", "chá", "cha", "natural", "sono", "relaxar"],
+  },
 ];
 
 const CHAT_KB = [
@@ -136,6 +172,21 @@ const CHAT_KB = [
     keys: ["enfermagem", "estudo", "resumo"],
     reply:
       "Na área de estudos, a ideia da Senda é reunir resumos (sinais vitais, farmacologia básica, nutrição clínica) para quem aprende ou ensina — como profissionais de enfermagem compartilhando material didático.",
+  },
+  {
+    keys: ["creatina"],
+    reply:
+      "Creatina monoidratada é bem estudada para força e performance. Faixa comum citada: cerca de 3–5 g/dia com água. Não substitui treino nem proteína. Quem tem doença renal deve consultar médico.",
+  },
+  {
+    keys: ["whey", "suplemento", "suplementos"],
+    reply:
+      "Suplementos (whey, creatina, vitaminas) complementam a alimentação — não a substituem. Whey serve para fechar proteína; vitaminas só fazem sentido se houver deficiência ou orientação. Avalie com nutricionista.",
+  },
+  {
+    keys: ["anabolizante", "anabolizantes", "esteroide", "esteroides"],
+    reply:
+      "Anabolizantes sem indicação médica trazem riscos sérios (coração, fígado, hormônios). A Senda não indica ciclo, dose nem compra. Se houver interesse clínico legítimo, fale com médico.",
   },
 ];
 
@@ -332,14 +383,77 @@ function renderContents(filter = "todos") {
     .join("");
 }
 
-function chatReply(text) {
+const CHAT_DAILY_LIMIT = 25;
+const CHAT_LIMIT_KEY = "senda_chat_quota";
+
+function localChatReply(text) {
   const q = text.toLowerCase().normalize("NFD").replace(/\p{M}/gu, "");
   for (const entry of CHAT_KB) {
     if (entry.keys.some((k) => q.includes(k.normalize("NFD").replace(/\p{M}/gu, "")))) {
       return entry.reply;
     }
   }
-  return "Ainda não tenho uma resposta específica para isso neste protótipo. Tente perguntar sobre déficit, superávit, proteína, hidratação, metabolismo, sono ou exames. Ou use a ferramenta de orientação com seus dados.";
+  return "Ainda não tenho essa resposta na base local. Com a IA ligada na Vercel, perguntas novas passam a ser interpretadas. Enquanto isso, tente déficit, proteína, creatina, hidratação, sono ou exames.";
+}
+
+function getChatQuota() {
+  const today = new Date().toISOString().slice(0, 10);
+  try {
+    const raw = JSON.parse(localStorage.getItem(CHAT_LIMIT_KEY) || "{}");
+    if (raw.day !== today) return { day: today, count: 0 };
+    return { day: today, count: Number(raw.count) || 0 };
+  } catch {
+    return { day: today, count: 0 };
+  }
+}
+
+function bumpChatQuota() {
+  const q = getChatQuota();
+  q.count += 1;
+  localStorage.setItem(CHAT_LIMIT_KEY, JSON.stringify(q));
+  return q;
+}
+
+async function askSenda(text) {
+  const quota = getChatQuota();
+  if (quota.count >= CHAT_DAILY_LIMIT) {
+    return {
+      reply: `Limite do protótipo: ${CHAT_DAILY_LIMIT} perguntas por dia neste navegador. Volte amanhã ou use a base de conteúdos abaixo.`,
+      source: "limit",
+    };
+  }
+
+  try {
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: text }),
+    });
+    const data = await res.json().catch(() => ({}));
+
+    if (res.ok && data.reply) {
+      bumpChatQuota();
+      return { reply: data.reply, source: "ai" };
+    }
+
+    if (data.fallback || data.code === "missing_api_key" || res.status === 503) {
+      bumpChatQuota();
+      return { reply: localChatReply(text), source: "local" };
+    }
+
+    if (res.status === 429) {
+      return { reply: data.error || "Muitas perguntas agora. Aguarde um pouco.", source: "limit" };
+    }
+
+    bumpChatQuota();
+    return {
+      reply: data.error ? `${data.error} Usando base local: ${localChatReply(text)}` : localChatReply(text),
+      source: "local",
+    };
+  } catch {
+    bumpChatQuota();
+    return { reply: localChatReply(text), source: "local" };
+  }
 }
 
 function appendBubble(text, who) {
@@ -349,6 +463,14 @@ function appendBubble(text, who) {
   div.textContent = text;
   log.appendChild(div);
   log.scrollTop = log.scrollHeight;
+}
+
+function setChatBusy(busy) {
+  const input = document.getElementById("chat-input");
+  const btn = document.querySelector("#chat-form button");
+  input.disabled = busy;
+  btn.disabled = busy;
+  btn.textContent = busy ? "Pensando…" : "Enviar";
 }
 
 function init() {
@@ -386,14 +508,18 @@ function init() {
     });
   });
 
-  document.getElementById("chat-form").addEventListener("submit", (e) => {
+  document.getElementById("chat-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const input = document.getElementById("chat-input");
     const text = input.value.trim();
     if (!text) return;
     appendBubble(text, "user");
     input.value = "";
-    setTimeout(() => appendBubble(chatReply(text), "bot"), 280);
+    setChatBusy(true);
+    const { reply } = await askSenda(text);
+    appendBubble(reply, "bot");
+    setChatBusy(false);
+    input.focus();
   });
 
   document.getElementById("interest-form").addEventListener("submit", (e) => {
