@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Senda — Nutrição, saúde e conhecimento</title>
+  <meta name="description" content="Plataforma de orientação em nutrição, saúde e desenvolvimento. Calcule suas necessidades e receba direção prática." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="noise" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <a href="#topo" class="logo" aria-label="Senda, início">
+      <span class="logo-mark"></span>
+      Senda
+    </a>
+    <nav class="nav" aria-label="Principal">
+      <a href="#ferramenta">Ferramenta</a>
+      <a href="#conteudos">Conteúdos</a>
+      <a href="#visao">Visão</a>
+      <a href="#participar">Participar</a>
+    </nav>
+    <a class="btn btn-sm" href="#ferramenta">Começar</a>
+  </header>
+
+  <main id="topo">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="brand-signal">Senda</p>
+        <h1>Direção clara para cuidar da sua saúde</h1>
+        <p class="hero-lead">
+          Nutrição, bem-estar e conhecimento em um só lugar — para uso pessoal ou para quem quer evoluir na área.
+        </p>
+        <div class="hero-actions">
+          <a class="btn" href="#ferramenta">Testar orientação</a>
+          <a class="btn btn-ghost" href="#visao">Ver a visão</a>
+        </div>
+      </div>
+      <div class="hero-visual" aria-hidden="true">
+        <div class="hero-orb hero-orb-a"></div>
+        <div class="hero-orb hero-orb-b"></div>
+        <div class="hero-panel">
+          <span class="hero-panel-label">Hoje</span>
+          <strong>Déficit guiado</strong>
+          <p>Calorias · hidratação · próximos passos</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="ferramenta" class="section tool-section">
+      <div class="section-head">
+        <h2>Orientação personalizada</h2>
+        <p>Informe seus dados e o foco. A Senda calcula o metabolismo, sugere calorias e indica caminhos práticos.</p>
+      </div>
+
+      <div class="tool-layout">
+        <form id="health-form" class="tool-form" novalidate>
+          <fieldset>
+            <legend>Seu objetivo</legend>
+            <div class="goal-grid" role="radiogroup" aria-label="Objetivo">
+              <label class="goal-option">
+                <input type="radio" name="goal" value="emagrecer" checked />
+                <span>Emagrecer</span>
+              </label>
+              <label class="goal-option">
+                <input type="radio" name="goal" value="ganhar" />
+                <span>Ganhar massa</span>
+              </label>
+              <label class="goal-option">
+                <input type="radio" name="goal" value="manter" />
+                <span>Manter peso</span>
+              </label>
+              <label class="goal-option">
+                <input type="radio" name="goal" value="aprender" />
+                <span>Aprender</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <div class="form-grid">
+            <label>
+              Idade
+              <input type="number" name="age" min="14" max="100" value="28" required />
+            </label>
+            <label>
+              Sexo biológico
+              <select name="sex" required>
+                <option value="feminino">Feminino</option>
+                <option value="masculino">Masculino</option>
+              </select>
+            </label>
+            <label>
+              Peso (kg)
+              <input type="number" name="weight" min="30" max="250" step="0.1" value="72" required />
+            </label>
+            <label>
+              Altura (cm)
+              <input type="number" name="height" min="120" max="230" value="168" required />
+            </label>
+            <label>
+              Água / dia (litros)
+              <input type="number" name="water" min="0.5" max="8" step="0.1" value="2" />
+            </label>
+            <label>
+              Nível de atividade
+              <select name="activity" required>
+                <option value="1.2">Sedentário</option>
+                <option value="1.375" selected>Leve (1–3x/semana)</option>
+                <option value="1.55">Moderado (3–5x/semana)</option>
+                <option value="1.725">Intenso (6–7x/semana)</option>
+                <option value="1.9">Atleta</option>
+              </select>
+            </label>
+          </div>
+
+          <label class="full">
+            O que você quer pesquisar ou focar agora?
+            <input type="text" name="query" id="query-input" placeholder="Ex.: déficit calórico, proteína, anemia, hidratação..." />
+          </label>
+
+          <button type="submit" class="btn btn-block">Gerar minha direção</button>
+          <p class="form-note">Uso educativo. Não substitui consulta médica, nutricional ou exames profissionais.</p>
+        </form>
+
+        <div class="tool-result" id="result-panel" aria-live="polite">
+          <div class="result-empty" id="result-empty">
+            <h3>Sua orientação aparece aqui</h3>
+            <p>Preencha o formulário ao lado. Em segundos você vê metabolismo basal, meta calórica e próximos passos.</p>
+          </div>
+          <div class="result-body hidden" id="result-body"></div>
+        </div>
+      </div>
+
+      <div class="chat-wrap">
+        <div class="section-head section-head-sm">
+          <h3>Pergunte à Senda</h3>
+          <p>Tire dúvidas rápidas sobre nutrição e hábitos. Respostas baseadas em conteúdo educativo da plataforma.</p>
+        </div>
+        <div class="chat" id="chat">
+          <div class="chat-log" id="chat-log">
+            <div class="bubble bot">
+              Olá. Pode perguntar sobre déficit calórico, proteína, hidratação, sono ou quando procurar um profissional.
+            </div>
+          </div>
+          <form class="chat-form" id="chat-form">
+            <input type="text" id="chat-input" placeholder="Digite sua pergunta..." autocomplete="off" />
+            <button type="submit" class="btn">Enviar</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section id="conteudos" class="section contents-section">
+      <div class="section-head">
+        <h2>Conteúdos para aprender e aplicar</h2>
+        <p>Resumos práticos de nutrição, saúde e áreas afins — úteis no dia a dia ou no estudo profissional.</p>
+      </div>
+      <div class="filter-bar">
+        <button type="button" class="filter active" data-filter="todos">Todos</button>
+        <button type="button" class="filter" data-filter="nutricao">Nutrição</button>
+        <button type="button" class="filter" data-filter="saude">Saúde</button>
+        <button type="button" class="filter" data-filter="estudos">Estudos</button>
+        <button type="button" class="filter" data-filter="natural">Natural</button>
+      </div>
+      <div class="content-list" id="content-list"></div>
+    </section>
+
+    <section id="visao" class="section vision-section">
+      <div class="section-head">
+        <h2>A visão da plataforma</h2>
+        <p>Um lugar só para orientação prática, conteúdo confiável e caminho de crescimento — no navegador hoje, no celular depois.</p>
+      </div>
+      <div class="vision-grid">
+        <article>
+          <h3>App + web</h3>
+          <p>Versão no Chrome agora; depois App Store e Play Store para quem prefere acesso simples no celular.</p>
+        </article>
+        <article>
+          <h3>Orientação sob medida</h3>
+          <p>Metas, metabolismo, hidratação e alertas para exames quando os dados pedirem atenção profissional.</p>
+        </article>
+        <article>
+          <h3>Conhecimento compartilhado</h3>
+          <p>Espaço para profissionais e estudantes — como enfermagem e nutrição — publicarem resumos e aulas.</p>
+        </article>
+        <article>
+          <h3>Comunidade</h3>
+          <p>Em um segundo momento, pessoas interessadas entram para criar conteúdo, testar ou apoiar o projeto.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="participar" class="section join-section">
+      <div class="join-panel">
+        <h2>Quer participar?</h2>
+        <p>
+          Se você estuda saúde, ensina, programa ou só quer acompanhar o projeto, deixe um interesse.
+          Este protótipo é o primeiro passo.
+        </p>
+        <form id="interest-form" class="interest-form">
+          <label>
+            Nome
+            <input type="text" name="name" required placeholder="Seu nome" />
+          </label>
+          <label>
+            Como pode contribuir?
+            <select name="role" required>
+              <option value="conteudo">Criar conteúdo / ensinar</option>
+              <option value="tecnologia">Tecnologia / design</option>
+              <option value="saude">Profissional de saúde</option>
+              <option value="usuario">Usar e dar feedback</option>
+            </select>
+          </label>
+          <label class="full">
+            Mensagem
+            <textarea name="message" rows="3" placeholder="Conte em uma frase o que te interessa..."></textarea>
+          </label>
+          <button type="submit" class="btn">Registrar interesse</button>
+        </form>
+        <p class="interest-feedback hidden" id="interest-feedback" role="status"></p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div>
+      <strong>Senda</strong>
+      <p>Protótipo educativo · Julho 2026</p>
+    </div>
+    <p class="disclaimer">
+      Informações gerais sobre nutrição e hábitos. Não é diagnóstico nem prescrição. Em caso de dúvida, procure um profissional.
+    </p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
